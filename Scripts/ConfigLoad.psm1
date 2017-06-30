@@ -1,0 +1,1 @@
+. $PSScriptRoot\..\Config.ps1

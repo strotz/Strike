@@ -37,5 +37,9 @@ else
    exit
 }
 
+Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
+
+Write-Host $global:config.Var1
+
 Write-Host -NoNewLine "Press any key to continue..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
