@@ -2,6 +2,16 @@
 # Strike.ps1
 #
 
+#
+# Functions
+# TODO: move to modules
+
+Function ExitWitWait {
+    Write-Host -NoNewLine "Press any key to continue..."
+    $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit
+}
+
 # Get the ID and security principal of the current user account
 $myWindowsID=[System.Security.Principal.WindowsIdentity]::GetCurrent()
 $myWindowsPrincipal=new-object System.Security.Principal.WindowsPrincipal($myWindowsID)
@@ -42,5 +52,4 @@ Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
 Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
 Write-Host "VMVare server:" $global:config.VMWareServer
 
-Write-Host -NoNewLine "Press any key to continue..."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+ExitWitWait
