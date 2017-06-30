@@ -1,5 +1,5 @@
 $global:config = @{   
-    Var1 = "Value1"
+    VMWareServer = "server IP or name"
 
     varCollection = @{       
         item0 = "colValue0"

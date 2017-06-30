@@ -39,7 +39,8 @@ else
 
 Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
 
-Write-Host $global:config.Var1
+Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
+Write-Host "VMVare server:" $global:config.VMWareServer
 
 Write-Host -NoNewLine "Press any key to continue..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
