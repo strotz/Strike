@@ -6,6 +6,8 @@
 # Functions
 # TODO: move to modules
 
+Function Get-VComputerName {[system.environment]::MachineName}
+
 Function ExitWitWait {
     Write-Host -NoNewLine "Press any key to continue..."
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
@@ -52,6 +54,24 @@ else
 #
 if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
 
+#
+#
+#
+Write-Host "Validating computer and VM names..."
+
+$computerName = Get-VComputerName
+
+#
+# Ensure that current PC is VMWare 
+#
+$WMISplat = @{}
+$WMISplat.ComputerName = $computerName
+$wmibios = Get-WmiObject Win32_BIOS @WMISplat -ErrorAction Stop | Select-Object version,serialnumber
+$underVMWare = if ($wmibios.SerialNumber -like "*VMware*") { $true } else { $false }
+if (!$underVMWare) {
+    Write-Host -NoNewLine "Not running on VM"
+    ExitWitWait
+}
 
 Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
 Write-Host "VMVare server:" $global:config.VMWareServer
