@@ -47,7 +47,11 @@ else
    exit
 }
 
-Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
+#
+# PowerShell 2.0 compatibility
+#
+if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
+
 
 Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
 Write-Host "VMVare server:" $global:config.VMWareServer
