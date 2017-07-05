@@ -91,4 +91,34 @@ Import-Module $PSScriptRoot\VMTools.psm1
 
 Write-Host "VMVare server:" $global:config.VMWareServer
 
+$name = Read-Host 'What is your username?'
+$pass = Read-Host 'What is your password?' -AsSecureString
+$plain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
+
+try
+{
+    $viServer = Connect-VIServer -Server $global:config.VMWareServer -Protocol https -User $name -Password $plain
+    if (!$viServer) {
+       Write-Host 'Cannot connect to VIServer'
+       ExitWithWait
+    }
+}
+catch 
+{
+    Write-Host 'Cannot connect to VIServer'
+    ExitWithWait
+}
+
+$vmName = (Get-View -ViewType VirtualMachine -Property Name -Filter @{"Guest.HostName" = "^$($computerName)$"}).Name
+if ($computerName -ne $vmName) 
+{
+    Write-Host -fore red "WARNING: VM ($vmName) and Guest OS host name ($computerName) are different"
+}
+else
+{
+    Write-Host -fore green "Use $computerName for slave registration"
+}
+
+# $computerName = if (($result = Read-Host "Verify VM name [$computerName]") -eq '') {$computerName} else {$result}
+
 ExitWithWait
