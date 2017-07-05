@@ -8,7 +8,7 @@
 
 Function Get-VComputerName {[system.environment]::MachineName}
 
-Function ExitWitWait {
+Function ExitWithWait {
     Write-Host -NoNewLine "Press any key to continue..."
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit
@@ -49,14 +49,28 @@ else
    exit
 }
 
+
 #
 # PowerShell 2.0 compatibility
 #
 if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
 
 #
+# Checking for powershell version and call upgrade
 #
-#
+if (!$PSVersionTable) { $PVersion = 1 } Else { $PVersion = $PSVersionTable.PSVersion.Major }
+if ($PVersion -le 3) {
+    Write-Host "Version of PowerShell:" $PVersion  
+    Write-Host "Need upgrade PowerShell, reboot is required"
+    $continue = if (($result = Read-Host "Continue with update [Y]") -eq '') {"Y"} else {"N"}
+    if ($continue -eq "Y") {
+        Invoke-expression -Command $PSScriptRoot\Upgrade.ps1
+    }
+    exit
+}
+
+Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
+
 Write-Host "Validating computer and VM names..."
 
 $computerName = Get-VComputerName
@@ -70,10 +84,11 @@ $wmibios = Get-WmiObject Win32_BIOS @WMISplat -ErrorAction Stop | Select-Object 
 $underVMWare = if ($wmibios.SerialNumber -like "*VMware*") { $true } else { $false }
 if (!$underVMWare) {
     Write-Host -NoNewLine "Not running on VM"
-    ExitWitWait
+    ExitWithWait
 }
 
-Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
+Import-Module $PSScriptRoot\VMTools.psm1
+
 Write-Host "VMVare server:" $global:config.VMWareServer
 
-ExitWitWait
+ExitWithWait
