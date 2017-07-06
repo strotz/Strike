@@ -121,12 +121,11 @@ $vmName = (Get-View -ViewType VirtualMachine -Property Name -Filter @{"Guest.Hos
 if ($computerName -ne $vmName) 
 {
     Write-Host -fore red "WARNING: VM ($vmName) and Guest OS host name ($computerName) are different"
+    $computerName = if (($result = Read-Host "Verify slave name [$vmName]") -eq '') {$vmName} else {$result}
 }
 else
 {
     Write-Host -fore green "Use $computerName for slave registration"
 }
-
-# $computerName = if (($result = Read-Host "Verify VM name [$computerName]") -eq '') {$computerName} else {$result}
 
 ExitWithWait
