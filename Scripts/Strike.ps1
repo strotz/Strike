@@ -89,11 +89,19 @@ if (!$underVMWare) {
 
 Import-Module $PSScriptRoot\VMTools.psm1
 
-Write-Host "VMVare server:" $global:config.VMWareServer
+Write-Host "We need to connect to VMVare server:" $global:config.VMWareServer
 
-$name = Read-Host 'What is your username?'
-$pass = Read-Host 'What is your password?' -AsSecureString
-$plain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
+$name = if (!$global:config.VMWareLogin) { Read-Host 'What is your username?' } Else { $global:config.VMWareLogin }
+if (!$global:config.VMWarePassword) 
+{ 
+    $pass = Read-Host 'What is your password?' -AsSecureString
+    $plain = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
+}
+Else
+{
+    $plain = $global:config.VMWarePassword
+}
+
 
 try
 {

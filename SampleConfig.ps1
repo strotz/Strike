@@ -1,5 +1,7 @@
 $global:config = @{   
     VMWareServer = "server IP or name"
+    VMWareLogin = "login for  VServer"    
+    VMWarePassword = "password for VServer"
 
     varCollection = @{       
         item0 = "colValue0"
