@@ -1,3 +1,24 @@
+Function Execute-Command ($commandTitle, $commandPath, $commandArguments)
+{
+    $pinfo = New-Object System.Diagnostics.ProcessStartInfo
+    $pinfo.FileName = $commandPath
+    $pinfo.RedirectStandardError = $true
+    $pinfo.RedirectStandardOutput = $true
+    $pinfo.UseShellExecute = $false
+    $pinfo.Arguments = $commandArguments
+    $p = New-Object System.Diagnostics.Process
+    $p.StartInfo = $pinfo
+    $p.Start() | Out-Null
+    $p.WaitForExit()
+    [pscustomobject]@{
+        commandTitle = $commandTitle
+        stdout = $p.StandardOutput.ReadToEnd()
+        stderr = $p.StandardError.ReadToEnd()
+        ExitCode = $p.ExitCode  
+    }
+}
+
+
 function Register-Slave 
 {
 param(
@@ -55,7 +76,7 @@ $jenkinsPassword = $global:config.JenkinsPassword
 
 $jenkinsHome = $global:config.JenkinsLocation
 
-$run = Start-Process $java  -ArgumentList '-jar',$jenkinsCli,'-s',$jenkins,'login','--username',$jenkinsLogin,'--password',$jenkinsPassword -NoNewWindow -PassThru
+$run = Start-Process $java -ArgumentList '-jar',$jenkinsCli,'-s',$jenkins,'login','--username',$jenkinsLogin,'--password',$jenkinsPassword -NoNewWindow -PassThru
 $run.WaitForExit()
 
 $xml = "<slave>"
@@ -74,9 +95,18 @@ $xml += "<launcher class=`"hudson.slaves.JNLPLauncher`"/>"
 $xml += "<userId>$jenkinsLogin</userId>"
 $xml +="</slave>" 
 
-#Write-Host $xml
-$arguments = "-jar",$jenkinsCli,"-s",$jenkins,"create-node",$slaveName
-$xml | & $java $arguments 
+# $arguments = "-jar",$jenkinsCli,"-s",$jenkins,"create-node",$slaveName
+# $xml | & $java $arguments 
+
+$groovyScript = "$PSScriptRoot\readslave.groovy"
+$arguments = '-jar',$jenkinsCli,'-s',$jenkins,'groovy',$groovyScript,$slaveName
+$result = Execute-Command -CommandTitle  'readslave' -CommandPath  $java  -CommandArguments $arguments
+$sectret = $result.stdout.TrimEnd()
 }
+
+
+# TODO: download slave.jar to $jenkinsCliLocation C:\automation\jenkins
+# TODO: crate start_slave.cmd in $jenkinsCliLocation
+
 
 export-modulemember -function Register-Slave
