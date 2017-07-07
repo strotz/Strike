@@ -105,15 +105,18 @@ Else
 
 try
 {
+    # Allow the use of self-signed SSL certificates.
+    [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $True }
+
     $viServer = Connect-VIServer -Server $global:config.VMWareServer -Protocol https -User $name -Password $plain
     if (!$viServer) {
-       Write-Host 'Cannot connect to VIServer'
+       Write-Host -fore red 'Cannot connect to VIServer'
        ExitWithWait
     }
 }
 catch 
 {
-    Write-Host 'Cannot connect to VIServer'
+    Write-Host -fore red 'Cannot connect to VIServer'
     ExitWithWait
 }
 
@@ -127,5 +130,11 @@ else
 {
     Write-Host -fore green "Use $computerName for slave registration"
 }
+
+$slaveLabel = $global:config.SlaveLabel
+
+Import-Module $PSScriptRoot\Jenkins.psm1
+Register-Slave -SlaveName $computerName -SlaveDescription "Test automation slave" -SlaveLabel $slaveLabel
+
 
 ExitWithWait

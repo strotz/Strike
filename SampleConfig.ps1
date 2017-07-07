@@ -1,13 +1,14 @@
 $global:config = @{   
+    InstallLocation = "C:\automation"
+    JenkinsLocation = "C:\jenkins"
+
     VMWareServer = "server IP or name"
     VMWareLogin = "login for  VServer"    
     VMWarePassword = "password for VServer"
+
     JenkinsServerUrl = "http://jenkins/"
+    JenkinsLogin = "login for Jenkins server"
+    JenkinsPassword = "password for Jenkins server"
 
-
-    varCollection = @{       
-        item0 = "colValue0"
-        item1 = "colValue1"
-        item2 = "colValue2"
-    }       
+    SlaveLabel = "jenkins_group"
 }
