@@ -48,3 +48,16 @@ Function Enable-AutoLogin {
 
    # "DefaultDomainName"="domain"
 }
+
+
+Function Enable-SlaveAutoRun {
+   param (
+      $cmd
+   )
+
+   $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run"
+   
+   $name = "StartSlave"
+   $value = $cmd
+   New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType STRING -Force | Out-Null
+}

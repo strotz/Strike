@@ -150,6 +150,11 @@ Make-Administrator -Login $windowsUser
 Write-Host "Enabling auto logon..."
 Enable-AutoLogin -Login $windowsUser -Password $windowsPassword
 
+Write-Host "Enabling jenkins slave auto run..."
+$location = Resolve-InstallLocation
+$jenkinsSlaveCmd = "$location\jenkins\start_slave.cmd"
+Enable-SlaveAutoRun -Cmd $jenkinsSlaveCmd
+
 
 
 ExitWithWait

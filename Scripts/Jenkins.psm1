@@ -18,8 +18,22 @@ Function Execute-Command ($commandTitle, $commandPath, $commandArguments)
     }
 }
 
+Function Resolve-InstallLocation {
 
-function Register-Slave 
+   if (!$global:InstallLocation) 
+   {
+      $location = $global:config.InstallLocation
+      if (!$location)
+      {
+         $defaultInstallLocation = "C:\automation"
+         $location = if (($result = Read-Host "What is install location is [$defaultInstallLocation]") -eq '') {$defaultInstallLocation} else {$result}
+      }
+      $global:InstallLocation = $location
+   }
+   return $global:InstallLocation
+}
+
+Function Register-Slave 
 {
 param(
     $slaveName,
@@ -39,13 +53,7 @@ Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
 # Confirm install location
 #
 
-$location = $global:config.InstallLocation
-if (!$location)
-{
-    $defaultInstallLocation = "C:\automation"
-    $location = if (($result = Read-Host "What is install location is [$defaultInstallLocation]") -eq '') {$defaultInstallLocation} else {$result}
-}
-
+$location = Resolve-InstallLocation
 $jenkinsCliLocation = "$location\jenkins\"
 $jenkinsCli = "$($jenkinsCliLocation)jenkins-cli.jar"
 
@@ -125,4 +133,4 @@ $startCmd | Set-Content "$($jenkinsCliLocation)start_slave.cmd"
 
 
 
-export-modulemember -function Register-Slave
+export-modulemember -function Register-Slave, Resolve-InstallLocation
