@@ -158,8 +158,11 @@ Enable-SlaveAutoRun -Cmd $jenkinsSlaveCmd
 Write-Host "Disabling UAC..."
 Disable-UAC
 
-Write-Host -fore green "PC will be rebooted"
+Write-Host -fore green "Slave setup is complete. PC need to be rebooted"
 
-Write-Host -NoNewLine "Press any key to continue..."
-$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-Restart-Computer -Force
+Write-Host "Press 'R' to REBOOT or any other key to exit..."
+$key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+if ($key.Character -eq "R") {
+   Write-Host "rebooting"
+   Restart-Computer -Force
+}
