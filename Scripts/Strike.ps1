@@ -155,6 +155,11 @@ $location = Resolve-InstallLocation
 $jenkinsSlaveCmd = "$location\jenkins\start_slave.cmd"
 Enable-SlaveAutoRun -Cmd $jenkinsSlaveCmd
 
+Write-Host "Disabling UAC..."
+Disable-UAC
 
+Write-Host -fore green "PC will be rebooted"
 
-ExitWithWait
+Write-Host -NoNewLine "Press any key to continue..."
+$null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+Restart-Computer

@@ -61,3 +61,24 @@ Function Enable-SlaveAutoRun {
    $value = $cmd
    New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType STRING -Force | Out-Null
 }
+
+Function Disable-UAC {
+
+   $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System"
+   
+   $name = "ConsentPromptBehaviorAdmin"
+   $value = "0"
+   New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType DWORD -Force | Out-Null
+
+   $name = "EnableLUA"
+   New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType DWORD -Force | Out-Null
+
+   $name = "EnableInstallerDetection"
+   New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType DWORD -Force | Out-Null
+
+   $name = "PromptOnSecureDesktop"
+   New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType DWORD -Force | Out-Null
+
+   $name = "ValidateAdminCodeSignatures"
+   New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType DWORD -Force | Out-Null
+}
