@@ -24,5 +24,27 @@ Function Make-Administrator {
    $Administrators = [ADSI]"WinNT://$Env:COMPUTERNAME/Administrators,Group"
    $User = "WinNT://$Env:COMPUTERNAME/$login,User"
    $Administrators.Add($User)
+}
 
+Function Enable-AutoLogin {
+   param (
+      $login,
+      $password
+   )
+
+   $registryPath = "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+   
+   $name = "AutoAdminLogon"
+   $value = "1"
+   New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType DWORD -Force | Out-Null
+
+   $name = "DefaultUserName"
+   $value = $login
+   New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType STRING -Force | Out-Null
+
+   $name = "DefaultPassword"
+   $value = $password
+   New-ItemProperty -Path $registryPath -Name $name -Value $value -PropertyType STRING -Force | Out-Null
+
+   # "DefaultDomainName"="domain"
 }

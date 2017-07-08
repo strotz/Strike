@@ -147,5 +147,9 @@ Create-TestRunUser -Login $windowsUser -Password $windowsPassword
 Write-Host "Adding administrative permissions..."
 Make-Administrator -Login $windowsUser
 
+Write-Host "Enabling auto logon..."
+Enable-AutoLogin -Login $windowsUser -Password $windowsPassword
+
+
 
 ExitWithWait
