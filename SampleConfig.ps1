@@ -11,4 +11,7 @@ $global:config = @{
     JenkinsPassword = "password for Jenkins server"
 
     SlaveLabel = "jenkins_group"
+
+    JenkinsWindowsUser = "jenkins"
+    JenkinsWindowsPassword = "Captain00"
 }

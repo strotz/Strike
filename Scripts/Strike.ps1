@@ -137,5 +137,15 @@ $slaveLabel = $global:config.SlaveLabel
 Import-Module $PSScriptRoot\Jenkins.psm1
 Register-Slave -SlaveName $slaveName -SlaveDescription "Test automation slave" -SlaveLabel $slaveLabel
 
+Import-Module $PSScriptRoot\TestBedSetup.psm1
+
+Write-Host "Setting jenkins user account..."
+$windowsUser = $global:config.JenkinsWindowsUser
+$windowsPassword = $global:config.JenkinsWindowsPassword
+Create-TestRunUser -Login $windowsUser -Password $windowsPassword
+
+Write-Host "Adding administrative permissions..."
+Make-Administrator -Login $windowsUser
+
 
 ExitWithWait

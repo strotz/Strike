@@ -15,3 +15,14 @@ Function Create-TestRunUser {
    $user.UserFlags = 64 + 65536 # ADS_UF_PASSWD_CANT_CHANGE + ADS_UF_DONT_EXPIRE_PASSWD
    $user.SetInfo()
 }
+
+Function Make-Administrator {
+   param (
+      $login
+   )
+
+   $Administrators = [ADSI]"WinNT://$Env:COMPUTERNAME/Administrators,Group"
+   $User = "WinNT://$Env:COMPUTERNAME/$login,User"
+   $Administrators.Add($User)
+
+}
