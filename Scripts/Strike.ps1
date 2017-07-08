@@ -162,4 +162,4 @@ Write-Host -fore green "PC will be rebooted"
 
 Write-Host -NoNewLine "Press any key to continue..."
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-Restart-Computer
+Restart-Computer -Force
