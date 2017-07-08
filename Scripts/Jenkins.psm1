@@ -27,6 +27,8 @@ param(
     $slaveLabel
 )
 
+Write-Host "Registering as jenkins slave..."
+
 if (!$slaveName) {
     Write-Host -fore red "Slave name must be specified" 
 }
@@ -76,6 +78,7 @@ $jenkinsPassword = $global:config.JenkinsPassword
 
 $jenkinsHome = $global:config.JenkinsLocation
 
+# TODO: unify to use Execute-Command
 $run = Start-Process $java -ArgumentList '-jar',$jenkinsCli,'-s',$jenkins,'login','--username',$jenkinsLogin,'--password',$jenkinsPassword -NoNewWindow -PassThru
 $run.WaitForExit()
 
@@ -95,18 +98,31 @@ $xml += "<launcher class=`"hudson.slaves.JNLPLauncher`"/>"
 $xml += "<userId>$jenkinsLogin</userId>"
 $xml +="</slave>" 
 
-# $arguments = "-jar",$jenkinsCli,"-s",$jenkins,"create-node",$slaveName
-# $xml | & $java $arguments 
+# TODO: unify to use Execute-Command
+$arguments = "-jar",$jenkinsCli,"-s",$jenkins,"create-node",$slaveName
+$xml | & $java $arguments 
 
 $groovyScript = "$PSScriptRoot\readslave.groovy"
 $arguments = '-jar',$jenkinsCli,'-s',$jenkins,'groovy',$groovyScript,$slaveName
 $result = Execute-Command -CommandTitle  'readslave' -CommandPath  $java  -CommandArguments $arguments
-$sectret = $result.stdout.TrimEnd()
+$secret = $result.stdout.TrimEnd()
+
+# TODO: download slave.jar to $jenkinsCliLocation C:\automation\jenkins
+
+#
+# Create start_slave.cmd
+#
+$startCmd = ""
+$startCmd += "set NAME=$slaveName`r`n"
+$startCmd += "set JSERVER=$jenkins`r`n"
+$startCmd += "set SECRET=$secret`r`n"
+$startCmd += "set ThisDir=%~dp0`r`n"
+$startCmd += "%ThisDir%\..\jre\bin\java.exe -jar %ThisDir%\slave.jar -jnlpUrl %JSERVER%/computer/%NAME%/slave-agent.jnlp -secret %SECRET%`r`n"
+$startCmd | Set-Content "$($jenkinsCliLocation)start_slave.cmd"
+
 }
 
 
-# TODO: download slave.jar to $jenkinsCliLocation C:\automation\jenkins
-# TODO: crate start_slave.cmd in $jenkinsCliLocation
 
 
 export-modulemember -function Register-Slave

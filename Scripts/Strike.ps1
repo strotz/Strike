@@ -124,17 +124,18 @@ $vmName = (Get-View -ViewType VirtualMachine -Property Name -Filter @{"Guest.Hos
 if ($computerName -ne $vmName) 
 {
     Write-Host -fore red "WARNING: VM ($vmName) and Guest OS host name ($computerName) are different"
-    $computerName = if (($result = Read-Host "Verify slave name [$vmName]") -eq '') {$vmName} else {$result}
+    $slaveName = if (($result = Read-Host "Verify slave name [$vmName]") -eq '') {$vmName} else {$result}
 }
 else
 {
-    Write-Host -fore green "Use $computerName for slave registration"
+    Write-Host -fore green "Use $vmName for slave registration"
+    $slaveName = $vmName
 }
 
 $slaveLabel = $global:config.SlaveLabel
 
 Import-Module $PSScriptRoot\Jenkins.psm1
-Register-Slave -SlaveName $computerName -SlaveDescription "Test automation slave" -SlaveLabel $slaveLabel
+Register-Slave -SlaveName $slaveName -SlaveDescription "Test automation slave" -SlaveLabel $slaveLabel
 
 
 ExitWithWait
