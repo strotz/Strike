@@ -33,6 +33,59 @@ Function Resolve-InstallLocation {
    return $global:InstallLocation
 }
 
+Function Generate-NodeFile ($slaveName, $slaveDescription, $slaveLabel, $jenkinsLogin, $properties) {
+
+   # TODO: ask?
+   Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
+   $jenkinsHome = $global:config.JenkinsLocation
+
+
+   $xml = "<slave>`n"
+   $xml += "<name>$slaveName</name>`n"
+   $xml += "<description>$slaveDescription</description>`n"
+   $xml += "<remoteFS>$jenkinsHome</remoteFS>`n"
+   $xml += "<numExecutors>1</numExecutors>`n"
+
+   if ($slaveLabel) {
+      $xml += "<mode>EXCLUSIVE</mode>`n"
+      $xml += "<label>$slaveLabel</label>`n"
+   }
+   else
+   {
+      Write-Host "Skipping slave label" 		
+   }
+
+   if ($properties) {
+      $xml += "<nodeProperties>`n"
+      $xml += "<hudson.slaves.EnvironmentVariablesNodeProperty>`n"
+      $xml += "<envVars serialization=`"custom`">`n"
+      $xml += "<unserializable-parents/>`n"
+      $xml += "<tree-map>`n"
+      $xml += "<default><comparator class=`"hudson.util.CaseInsensitiveComparator`"/></default>`n"
+
+      $xml += "<int>$($properties.count)</int>`n"
+      foreach ($key in $properties.Keys) {
+         $xml += "<string>$($key)</string>`n"
+         $xml += "<string>$($properties.$key)</string>`n" 
+      }
+
+      $xml += "</tree-map>`n"
+      $xml += "</envVars>`n"
+      $xml += "</hudson.slaves.EnvironmentVariablesNodeProperty>`n"
+      $xml += "</nodeProperties>`n"
+   }
+   else
+   { 
+      Write-Host "Skipping properties" 		
+   }
+
+   $xml += "<retentionStrategy class=`"hudson.slaves.RetentionStrategy`$Always`"/>`n"
+   $xml += "<launcher class=`"hudson.slaves.JNLPLauncher`"/>`n"
+   $xml += "<userId>$jenkinsLogin</userId>`n"
+   $xml += "</slave>`n" 
+   return $xml
+}
+
 Function Register-Slave 
 {
 param(
@@ -84,27 +137,11 @@ $java = "$($global:config.InstallLocation)\jre\bin\java.exe"
 $jenkinsLogin = $global:config.JenkinsLogin
 $jenkinsPassword = $global:config.JenkinsPassword
 
-$jenkinsHome = $global:config.JenkinsLocation
-
 # TODO: unify to use Execute-Command
 $run = Start-Process $java -ArgumentList '-jar',$jenkinsCli,'-s',$jenkins,'login','--username',$jenkinsLogin,'--password',$jenkinsPassword -NoNewWindow -PassThru
 $run.WaitForExit()
 
-$xml = "<slave>"
-$xml += "<name>$slaveName</name>"
-$xml += "<description>$slaveDescription</description>"
-$xml += "<remoteFS>$jenkinsHome</remoteFS>"
-$xml += "<numExecutors>1</numExecutors>"
-
-if (!$slaveLavel) {
-    $xml += "<mode>EXCLUSIVE</mode>"
-    $xml += "<label>$slaveLabel</label>"
-}
-
-$xml += "<retentionStrategy class=`"hudson.slaves.RetentionStrategy`$Always`"/>"
-$xml += "<launcher class=`"hudson.slaves.JNLPLauncher`"/>"
-$xml += "<userId>$jenkinsLogin</userId>"
-$xml +="</slave>" 
+$xml = Generate-NodeFile -SlaveName $slaveName -SlaveDescription $slaveDescription -SlaveLabel $slaveLabel -JenkinsLogin $jenkinsLogin 
 
 # TODO: unify to use Execute-Command
 $arguments = "-jar",$jenkinsCli,"-s",$jenkins,"create-node",$slaveName
@@ -130,7 +167,4 @@ $startCmd | Set-Content "$($jenkinsCliLocation)start_slave.cmd"
 
 }
 
-
-
-
-export-modulemember -function Register-Slave, Resolve-InstallLocation
+export-modulemember -function Register-Slave, Resolve-InstallLocation, Generate-NodeFile
