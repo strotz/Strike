@@ -64,7 +64,8 @@ if ($PVersion -le 3) {
     Write-Host "Need upgrade PowerShell, reboot is required"
     $continue = if (($result = Read-Host "Continue with update [Y]") -eq '') {"Y"} else {"N"}
     if ($continue -eq "Y") {
-        Invoke-expression -Command $PSScriptRoot\Upgrade.ps1
+        Write-Host "Start PowerShell upgrade sequence" 
+        Start-Process PowerShell.exe -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File',$PSScriptRoot\Upgrade.ps1,'-Verb','RunAs'
     }
     exit
 }
