@@ -33,6 +33,34 @@ Function Resolve-InstallLocation {
    return $global:InstallLocation
 }
 
+Function Resolve-JenkinsLogin {
+   if (!$global:JenkinsLogin) 
+   {
+      $jenkinsLogin = $global:config.JenkinsLogin
+      if (!$jenkinsLogin)
+      {
+         $jenkinsLogin = Read-Host "What is your Jenkins login?"
+      }
+      $global:JenkinsLogin = $jenkinsLogin
+   }
+   return $global:JenkinsLogin
+} 
+
+Function Resolve-JenkinsPassword {
+   if (!$global:JenkinsPassword) 
+   {
+      $jenkinsPassword = $global:config.JenkinsPassword
+      if (!$jenkinsPassword)
+      {
+         $pass = Read-Host 'What is your Jenkins password?' -AsSecureString
+         $jenkinsPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
+
+      }
+      $global:JenkinsPassword = $jenkinsPassword
+   }
+   return $global:JenkinsPassword
+}
+
 Function Generate-NodeFile ($slaveName, $slaveDescription, $slaveLabel, $jenkinsLogin, $properties) {
 
    # TODO: ask?
@@ -134,8 +162,8 @@ if (-not (Test-Path $jenkinsCli))
 
 $java = "$($global:config.InstallLocation)\jre\bin\java.exe"
 
-$jenkinsLogin = $global:config.JenkinsLogin
-$jenkinsPassword = $global:config.JenkinsPassword
+$jenkinsLogin = Resolve-JenkinsLogin
+$jenkinsPassword = Resolve-JenkinsPassword
 
 # TODO: unify to use Execute-Command
 $run = Start-Process $java -ArgumentList '-jar',$jenkinsCli,'-s',$jenkins,'login','--username',$jenkinsLogin,'--password',$jenkinsPassword -NoNewWindow -PassThru
