@@ -14,4 +14,8 @@ $global:config = @{
 
     JenkinsWindowsUser = "jenkins"
     JenkinsWindowsPassword = "Captain00"
+
+    NodeProperties = @{
+        user = "user"
+    }
 }

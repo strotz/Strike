@@ -141,7 +141,8 @@ $jenkinsPassword = $global:config.JenkinsPassword
 $run = Start-Process $java -ArgumentList '-jar',$jenkinsCli,'-s',$jenkins,'login','--username',$jenkinsLogin,'--password',$jenkinsPassword -NoNewWindow -PassThru
 $run.WaitForExit()
 
-$xml = Generate-NodeFile -SlaveName $slaveName -SlaveDescription $slaveDescription -SlaveLabel $slaveLabel -JenkinsLogin $jenkinsLogin 
+$properties = $global:config.NodeProperties
+$xml = Generate-NodeFile -SlaveName $slaveName -SlaveDescription $slaveDescription -SlaveLabel $slaveLabel -JenkinsLogin $jenkinsLogin -Properties $properties
 
 # TODO: unify to use Execute-Command
 $arguments = "-jar",$jenkinsCli,"-s",$jenkins,"create-node",$slaveName
