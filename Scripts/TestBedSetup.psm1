@@ -33,9 +33,18 @@ Function Make-Administrator {
       $login
    )
 
-   $Administrators = [ADSI]"WinNT://$Env:COMPUTERNAME/Administrators,Group"
-   $User = "WinNT://$Env:COMPUTERNAME/$login,User"
-   $Administrators.Add($User)
+   $group = [ADSI]"WinNT://$Env:COMPUTERNAME/Administrators,Group"
+   $members= @($group.psbase.Invoke("Members")) | foreach{([ADSI]$_).InvokeGet("Name")}
+   
+   if($members -NotContains $login)
+   { 
+       $User = "WinNT://$Env:COMPUTERNAME/$login,User"
+       $group.Add($User)
+   }
+   else
+   {
+      Write-Host "User is already administator"
+   }
 }
 
 Function Enable-AutoLogin {
