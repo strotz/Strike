@@ -1,19 +1,31 @@
-Function Create-TestRunUser {
+Function CreateUpdate-TestRunUser {
    param(
       $login,
       $password
    )
 
-   # Create new user for script purposes
-   $Computer = [ADSI]"WinNT://$Env:COMPUTERNAME,Computer"
+   $computer = [ADSI]"WinNT://$Env:COMPUTERNAME,Computer"
+   $localUsers = $computer.Children | where {$_.SchemaClassName -eq 'user'}  | % {$_.name[0].ToString()} 
 
-   $user = $Computer.Create("User", $login)
-   $user.SetPassword($password)
+   if($localUsers -NotContains $login)
+   { 
+      Write-Host "Create User"	
+      $user = $computer.Create("User", $login)
+   }
+   else
+   {
+      Write-Host "Update User"	
+      $user = [ADSI]"WinNT://$Env:COMPUTERNAME/$login,User"
+   }
+   $user.setpassword($password)
    $user.SetInfo()
    $user.FullName = "User that run Jenkins slave"
    $user.SetInfo()
+   $user.description = "CMM Test user"
+   $user.SetInfo()
    $user.UserFlags = 64 + 65536 # ADS_UF_PASSWD_CANT_CHANGE + ADS_UF_DONT_EXPIRE_PASSWD
    $user.SetInfo()
+   return $user
 }
 
 Function Make-Administrator {

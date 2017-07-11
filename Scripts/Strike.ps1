@@ -143,7 +143,7 @@ Import-Module $PSScriptRoot\TestBedSetup.psm1
 Write-Host "Setting jenkins user account..."
 $windowsUser = $global:config.JenkinsWindowsUser
 $windowsPassword = $global:config.JenkinsWindowsPassword
-Create-TestRunUser -Login $windowsUser -Password $windowsPassword
+$user = CreateUpdate-TestRunUser -Login $windowsUser -Password $windowsPassword
 
 Write-Host "Adding administrative permissions..."
 Make-Administrator -Login $windowsUser
