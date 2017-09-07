@@ -1,65 +1,3 @@
-Function Execute-Command ($commandTitle, $commandPath, $commandArguments)
-{
-    $pinfo = New-Object System.Diagnostics.ProcessStartInfo
-    $pinfo.FileName = $commandPath
-    $pinfo.RedirectStandardError = $true
-    $pinfo.RedirectStandardOutput = $true
-    $pinfo.UseShellExecute = $false
-    $pinfo.Arguments = $commandArguments
-    $p = New-Object System.Diagnostics.Process
-    $p.StartInfo = $pinfo
-    $p.Start() | Out-Null
-    $p.WaitForExit()
-    [pscustomobject]@{
-        commandTitle = $commandTitle
-        stdout = $p.StandardOutput.ReadToEnd()
-        stderr = $p.StandardError.ReadToEnd()
-        ExitCode = $p.ExitCode  
-    }
-}
-
-Function Resolve-InstallLocation {
-
-   if (!$global:InstallLocation) 
-   {
-      $location = $global:config.InstallLocation
-      if (!$location)
-      {
-         $defaultInstallLocation = "C:\automation"
-         $location = if (($result = Read-Host "What is install location is [$defaultInstallLocation]") -eq '') {$defaultInstallLocation} else {$result}
-      }
-      $global:InstallLocation = $location
-   }
-   return $global:InstallLocation
-}
-
-Function Resolve-JenkinsLogin {
-   if (!$global:JenkinsLogin) 
-   {
-      $jenkinsLogin = $global:config.JenkinsLogin
-      if (!$jenkinsLogin)
-      {
-         $jenkinsLogin = Read-Host "What is your Jenkins login?"
-      }
-      $global:JenkinsLogin = $jenkinsLogin
-   }
-   return $global:JenkinsLogin
-} 
-
-Function Resolve-JenkinsPassword {
-   if (!$global:JenkinsPassword) 
-   {
-      $jenkinsPassword = $global:config.JenkinsPassword
-      if (!$jenkinsPassword)
-      {
-         $pass = Read-Host 'What is your Jenkins password?' -AsSecureString
-         $jenkinsPassword = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($pass))
-
-      }
-      $global:JenkinsPassword = $jenkinsPassword
-   }
-   return $global:JenkinsPassword
-}
 
 Function Generate-NodeFile ($slaveName, $slaveDescription, $slaveLabel, $jenkinsLogin, $properties) {
 
@@ -129,6 +67,7 @@ if (!$slaveName) {
 }
 
 Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
+Import-Module $PSScriptRoot\World.psm1
 
 #
 # Confirm install location
@@ -165,20 +104,20 @@ $java = "$($global:config.InstallLocation)\jre\bin\java.exe"
 $jenkinsLogin = Resolve-JenkinsLogin
 $jenkinsPassword = Resolve-JenkinsPassword
 
-# TODO: unify to use Execute-Command
+# TODO: unify to use Invoke-Command
 $run = Start-Process $java -ArgumentList '-jar',$jenkinsCli,'-s',$jenkins,'login','--username',$jenkinsLogin,'--password',$jenkinsPassword -NoNewWindow -PassThru
 $run.WaitForExit()
 
 $properties = $global:config.NodeProperties
 $xml = Generate-NodeFile -SlaveName $slaveName -SlaveDescription $slaveDescription -SlaveLabel $slaveLabel -JenkinsLogin $jenkinsLogin -Properties $properties
 
-# TODO: unify to use Execute-Command
+# TODO: unify to use Invoke-Command
 $arguments = "-jar",$jenkinsCli,"-s",$jenkins,"create-node",$slaveName
 $xml | & $java $arguments 
 
 $groovyScript = "$PSScriptRoot\readslave.groovy"
 $arguments = '-jar',$jenkinsCli,'-s',$jenkins,'groovy',$groovyScript,$slaveName
-$result = Execute-Command -CommandTitle  'readslave' -CommandPath  $java  -CommandArguments $arguments
+$result = Invoke-Command -CommandTitle  'readslave' -CommandPath  $java  -CommandArguments $arguments
 $secret = $result.stdout.TrimEnd()
 
 # TODO: download slave.jar to $jenkinsCliLocation C:\automation\jenkins
@@ -196,4 +135,4 @@ $startCmd | Set-Content "$($jenkinsCliLocation)start_slave.cmd"
 
 }
 
-export-modulemember -function Register-Slave, Resolve-InstallLocation, Generate-NodeFile
+export-modulemember -function Register-Slave, Generate-NodeFile

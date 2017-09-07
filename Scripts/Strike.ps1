@@ -71,6 +71,7 @@ if ($PVersion -le 3) {
 }
 
 Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
+Import-Module $PSScriptRoot\World.psm1
 
 Write-Host "Validating computer and VM names..."
 
