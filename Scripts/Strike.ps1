@@ -25,7 +25,7 @@ $WMISplat.ComputerName = $computerName
 $wmibios = Get-WmiObject Win32_BIOS @WMISplat -ErrorAction Stop | Select-Object version, serialnumber
 $underVMWare = if ($wmibios.SerialNumber -like "*VMware*") { $true } else { $false }
 if (!$underVMWare) {
-    Write-Host -NoNewLine "Not running on VM"
+    Write-Host 'Not running on VM'
     Stop-WithWait
 }
 

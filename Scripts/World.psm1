@@ -6,7 +6,7 @@ Function Get-VComputerName {
 }
 
 Function Stop-WithWait {
-    Write-Host -NoNewLine "Press any key to continue..."
+    Write-Host "Press any key to continue..."
     $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit
 }
