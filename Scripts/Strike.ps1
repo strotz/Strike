@@ -5,7 +5,7 @@
 #
 # PowerShell 2.0 compatibility
 #
-if(!$PSScriptRoot){ $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
+if (!$PSScriptRoot) { $PSScriptRoot = Split-Path $MyInvocation.MyCommand.Path -Parent }
 
 Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
 Import-Module $PSScriptRoot\World.psm1
@@ -22,7 +22,7 @@ $computerName = Get-VComputerName
 #
 $WMISplat = @{}
 $WMISplat.ComputerName = $computerName
-$wmibios = Get-WmiObject Win32_BIOS @WMISplat -ErrorAction Stop | Select-Object version,serialnumber
+$wmibios = Get-WmiObject Win32_BIOS @WMISplat -ErrorAction Stop | Select-Object version, serialnumber
 $underVMWare = if ($wmibios.SerialNumber -like "*VMware*") { $true } else { $false }
 if (!$underVMWare) {
     Write-Host -NoNewLine "Not running on VM"
@@ -36,31 +36,27 @@ Write-Host "We need to connect to VMVare server:" $server
 $name = Resolve-VMWareLogin
 $plain = Resolve-VMWarePassword
 
-try
-{
+try {
     # Allow the use of self-signed SSL certificates.
     [System.Net.ServicePointManager]::ServerCertificateValidationCallback = { $True }
 
     $viServer = Connect-VIServer -Server $server -Protocol https -User $name -Password $plain
     if (!$viServer) {
-       Write-Host -fore red 'Cannot connect to VIServer'
-       Stop-WithWait
+        Write-Host -fore red 'Cannot connect to VIServer'
+        Stop-WithWait
     }
 }
-catch 
-{
+catch {
     Write-Host -fore red 'Cannot connect to VIServer'
     Stop-WithWait
 }
 
 $vmName = (Get-View -ViewType VirtualMachine -Property Name -Filter @{"Guest.HostName" = "^$($computerName)$"}).Name
-if ($computerName -ne $vmName) 
-{
+if ($computerName -ne $vmName) {
     Write-Host -fore red "WARNING: VM ($vmName) and Guest OS host name ($computerName) are different"
     $slaveName = if (($result = Read-Host "Verify slave name [$vmName]") -eq '') {$vmName} else {$result}
 }
-else
-{
+else {
     Write-Host -fore green "Use $vmName for slave registration"
     $slaveName = $vmName
 }
@@ -96,6 +92,6 @@ Write-Host -fore green "Slave setup is complete. PC need to be rebooted"
 Write-Host "Press 'R' to REBOOT or any other key to exit..."
 $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 if ($key.Character -eq "R") {
-   Write-Host "rebooting"
-   Restart-Computer -Force
+    Write-Host "rebooting"
+    Restart-Computer -Force
 }

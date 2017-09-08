@@ -13,22 +13,20 @@ Function Stop-WithWait {
 
 Function Assert-Administrator {
     # Get the ID and security principal of the current user account
-    $myWindowsID=[System.Security.Principal.WindowsIdentity]::GetCurrent()
-    $myWindowsPrincipal=new-object System.Security.Principal.WindowsPrincipal($myWindowsID)
+    $myWindowsID = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+    $myWindowsPrincipal = new-object System.Security.Principal.WindowsPrincipal($myWindowsID)
 
     # Get the security principal for the Administrator role
-    $adminRole=[System.Security.Principal.WindowsBuiltInRole]::Administrator
+    $adminRole = [System.Security.Principal.WindowsBuiltInRole]::Administrator
  
     # Check to see if we are currently running "as Administrator"
-    if ($myWindowsPrincipal.IsInRole($adminRole))
-    {
+    if ($myWindowsPrincipal.IsInRole($adminRole)) {
         # We are running "as Administrator" - so change the title and background color to indicate this
         $Host.UI.RawUI.WindowTitle = $myInvocation.MyCommand.Definition + "(Elevated)"
         $Host.UI.RawUI.BackgroundColor = "DarkBlue"
         clear-host
     }
-    else
-    {
+    else {
         # We are not running "as Administrator" - so relaunch as administrator
    
         # Create a new process object that starts PowerShell
@@ -59,14 +57,13 @@ Function Assert-V2 {
         $continue = if (($result = Read-Host "Continue with update [Y]") -eq '') {"Y"} else {"N"}
         if ($continue -eq "Y") {
             Write-Host "Start PowerShell upgrade sequence" 
-            Start-Process PowerShell.exe -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File',$PSScriptRoot\Upgrade.ps1,'-Verb','RunAs'
+            Start-Process PowerShell.exe -ArgumentList '-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', $PSScriptRoot\Upgrade.ps1, '-Verb', 'RunAs'
         }
         exit
     }
 }
 
-Function Invoke-Command ($commandTitle, $commandPath, $commandArguments)
-{
+Function Invoke-Command ($commandTitle, $commandPath, $commandArguments) {
     $pinfo = New-Object System.Diagnostics.ProcessStartInfo
     $pinfo.FileName = $commandPath
     $pinfo.RedirectStandardError = $true
@@ -79,9 +76,9 @@ Function Invoke-Command ($commandTitle, $commandPath, $commandArguments)
     $p.WaitForExit()
     [pscustomobject]@{
         commandTitle = $commandTitle
-        stdout = $p.StandardOutput.ReadToEnd()
-        stderr = $p.StandardError.ReadToEnd()
-        ExitCode = $p.ExitCode  
+        stdout       = $p.StandardOutput.ReadToEnd()
+        stderr       = $p.StandardError.ReadToEnd()
+        ExitCode     = $p.ExitCode  
     }
 }
 
