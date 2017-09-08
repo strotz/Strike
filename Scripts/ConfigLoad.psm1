@@ -51,6 +51,10 @@ Function Resolve-VMWarePassword {
     return $global:VMWarePassword
 }
 
+Function Resolve-JenkinsServer {
+    $global:config.JenkinsServerUrl
+}
+
 Function Resolve-JenkinsLogin {
     if (!$global:JenkinsLogin) {
         $jenkinsLogin = $global:config.JenkinsLogin
@@ -79,6 +83,20 @@ Function Resolve-JenkinsNodeLabel {
     $global:config.NodeLabel
 }
 
-Export-ModuleMember -function Resolve-InstallLocation, Resolve-JenkinsJobLocation, 
-    Resolve-VMWareServer, Resolve-VMWareLogin, Resolve-VMWarePassword, Resolve-JenkinsLogin,
-    Resolve-JenkinsPassword, Resolve-JenkinsNodeLabel
+Function Resolve-JenkinsNodeProperties {
+    $global:config.NodeProperties
+}
+
+Function Resolve-AutomationUserLogin {
+    $global:config.AutomationWindowsUser.login
+}
+
+Function Resolve-AutomationUserPassword {
+    $global:config.AutomationWindowsUser.password    
+}
+
+Export-ModuleMember -function Resolve-InstallLocation,  
+    Resolve-VMWareServer, Resolve-VMWareLogin, Resolve-VMWarePassword, 
+    Resolve-JenkinsServer, Resolve-JenkinsLogin, Resolve-JenkinsPassword, 
+    Resolve-JenkinsNodeLabel, Resolve-JenkinsNodeProperties,
+    Resolve-JenkinsJobLocation, Resolve-AutomationUserLogin, Resolve-AutomationUserPassword

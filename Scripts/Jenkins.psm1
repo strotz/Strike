@@ -3,7 +3,7 @@ Function Generate-NodeFile ($slaveName, $slaveDescription, $slaveLabel, $jenkins
 
     # TODO: ask?
     Import-Module $PSScriptRoot\ConfigLoad.psm1 -Force
-    $jenkinsHome = $global:config.JenkinsLocation
+    $jenkinsHome = Resolve-JenkinsJobLocation
 
 
     $xml = "<slave>`n"
@@ -71,6 +71,8 @@ Function Register-Slave {
     #
 
     $location = Resolve-InstallLocation
+    # TODO: current assumption that java binary located at $($global:config.InstallLocation)\jre\bin\java.exe, need to download java
+    $java = "$location\jre\bin\java.exe"
     $jenkinsCliLocation = "$location\jenkins\"
     $jenkinsCli = "$($jenkinsCliLocation)jenkins-cli.jar"
 
@@ -78,7 +80,7 @@ Function Register-Slave {
         $_ = New-Item -ItemType Directory -Force -Path $jenkinsCliLocation
     }
 
-    $jenkins = $global:config.JenkinsServerUrl
+    $jenkins = Resolve-JenkinsServer
     Write-Host "Now let's connect to Jenkins server ($jenkins) and register slave" 
     $wc = New-Object System.Net.WebClient
 
@@ -90,12 +92,6 @@ Function Register-Slave {
         Write-Host "Time taken: $((Get-Date).Subtract($start_time).Seconds) second(s)"
     }
 
-    #
-    # TODO: current assumption that java binary located at $($global:config.InstallLocation)\jre\bin\java.exe 
-    #
-
-    $java = "$($global:config.InstallLocation)\jre\bin\java.exe"
-
     $jenkinsLogin = Resolve-JenkinsLogin
     $jenkinsPassword = Resolve-JenkinsPassword
 
@@ -103,7 +99,7 @@ Function Register-Slave {
     $run = Start-Process $java -ArgumentList '-jar', $jenkinsCli, '-s', $jenkins, 'login', '--username', $jenkinsLogin, '--password', $jenkinsPassword -NoNewWindow -PassThru
     $run.WaitForExit()
 
-    $properties = $global:config.NodeProperties
+    $properties = Resolve-JenkinsNodeProperties
     $xml = Generate-NodeFile -SlaveName $slaveName -SlaveDescription $slaveDescription -SlaveLabel $slaveLabel -JenkinsLogin $jenkinsLogin -Properties $properties
 
     # TODO: unify to use Invoke-Command
@@ -130,4 +126,4 @@ Function Register-Slave {
 
 }
 
-export-modulemember -function Register-Slave, Generate-NodeFile
+Export-ModuleMember -function Register-Slave, Generate-NodeFile
