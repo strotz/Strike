@@ -17,6 +17,10 @@ Write-Host "Validating computer and VM names..."
 
 $computerName = Get-VComputerName
 
+$pc = Get-WmiObject Win32_ComputerSystem
+$domain = $pc.Domain
+$fullHostName = if ($domain) {"$($computerName).$($domain)"} else {$computerName}
+
 #
 # Ensure that current PC is VMWare 
 #
@@ -51,20 +55,21 @@ catch {
     Stop-WithWait
 }
 
-$vmName = (Get-View -ViewType VirtualMachine -Property Name -Filter @{"Guest.HostName" = "^$($computerName)$"}).Name
+$vmName = (Get-View -ViewType VirtualMachine -Property Name -Filter @{"Guest.HostName" = "^$($fullHostName)$"}).Name
 if ($computerName -ne $vmName) {
     Write-Host -fore red "WARNING: VM ($vmName) and Guest OS host name ($computerName) are different"
-    $slaveName = if (($result = Read-Host "Verify slave name [$vmName]") -eq '') {$vmName} else {$result}
+    $nodeName = if (($result = Read-Host "Verify slave name [$vmName]") -eq '') {$vmName} else {$result}
 }
 else {
     Write-Host -fore green "Use $vmName for slave registration"
-    $slaveName = $vmName
+    $nodeName = $vmName
 }
 
 $nodeLabel = Resolve-JenkinsNodeLabel
 
+# TODO: check if node is registerd already
 Import-Module $PSScriptRoot\Jenkins.psm1
-Register-Slave -SlaveName $slaveName -SlaveDescription "Test automation slave" -SlaveLabel $nodeLabel
+Register-Slave -SlaveName $nodeName -SlaveDescription "Test automation slave" -SlaveLabel $nodeLabel
 
 Import-Module $PSScriptRoot\TestBedSetup.psm1
 
@@ -87,7 +92,7 @@ Enable-SlaveAutoRun -Cmd $jenkinsSlaveCmd
 Write-Host "Disabling UAC..."
 Disable-UAC
 
-Write-Host -fore green "Slave setup is complete. PC need to be rebooted"
+Write-Host -fore green "Jenkins node setup is complete. PC need to be rebooted"
 
 Write-Host "Press 'R' to REBOOT or any other key to exit..."
 $key = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
