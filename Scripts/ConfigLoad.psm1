@@ -28,6 +28,10 @@ Function Resolve-VMWareServer {
     return $global:config.VMWareServer
 }
 
+Function Resolve-VMWareDataCenterName {
+    return $global:config.VMWareDataCenterName
+}
+
 Function Resolve-VMWareLogin {
     if (!$global:VMWareLogin) {
         $name = $global:config.VMWareLogin
@@ -96,7 +100,7 @@ Function Resolve-AutomationUserPassword {
 }
 
 Export-ModuleMember -function Resolve-InstallLocation,  
-    Resolve-VMWareServer, Resolve-VMWareLogin, Resolve-VMWarePassword, 
+    Resolve-VMWareServer, Resolve-VMWareLogin, Resolve-VMWarePassword, Resolve-VMWareDataCenterName,
     Resolve-JenkinsServer, Resolve-JenkinsLogin, Resolve-JenkinsPassword, 
     Resolve-JenkinsNodeLabel, Resolve-JenkinsNodeProperties,
     Resolve-JenkinsJobLocation, Resolve-AutomationUserLogin, Resolve-AutomationUserPassword

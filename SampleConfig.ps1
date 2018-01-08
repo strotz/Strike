@@ -5,6 +5,7 @@ $global:config = @{
     VMWareServer = "server IP or name"
     VMWareLogin = "login for  VServer"    
     VMWarePassword = "password for VServer"
+    VMWareDataCenterName = ""
 
     JenkinsServerUrl = "http://jenkins/"
     JenkinsLogin = "login for Jenkins server"
